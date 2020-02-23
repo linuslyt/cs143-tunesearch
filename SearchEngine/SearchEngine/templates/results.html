@@ -1,0 +1,76 @@
+<html>
+	<head>
+		<title>TuneSearch Results for {{query}}</title>
+		<link rel="stylesheet" type="text/css" href="/static/searchengine.css" media="screen" />
+	</head>
+	<body>
+		<div id="results_top">
+			<div id="logo">
+				<img src="/static/header.png" width=100px height=30px>
+			</div>
+			<div id="searchbar">
+				<form action="{{ url_for('dosearch') }}" method="GET">
+					<div>
+						{% if query_type|string() == "or" %}
+						<input type="radio" name="query_type" value="or" checked>
+						<label for="or">OR</label>
+						<input type="radio" name="query_type" value="and">
+						<label for="and">AND</label>
+						{% else %}
+						<input type="radio" name="query_type" value="or">
+						<label for="or">OR</label>
+						<input type="radio" name="query_type" value="and"checked>
+						<label for="and">AND</label>
+						{% endif %}
+
+						<input type="hidden" name="repeat_last_query" value="0">
+						<input type="text" maxlength=50 size=50 name="query" value="{{query}}"><input type="submit" value="Search">
+					</div>
+				</form>
+			</div>
+			<div id="nav">
+				<div><p>
+					{% if (page_offset|int + 20) < total_rows|int %}
+					<form action="{{ url_for('dosearch') }}" method="GET" display=>			
+							<input type="hidden" name="query_type" value="{{query_type}}">
+							<input type="hidden" maxlength=50 size=50 name="query" value="{{query}}">
+							<input type="hidden" name="repeat_last_query" value="1">
+							<input type="hidden" name="offset" value="+">
+							<input type="submit" value="Next">
+					</form>
+					{% endif %}
+
+					{% if page_offset|int > 0 %}
+					<form action="{{ url_for('dosearch') }}" method="GET">			
+							<input type="hidden" name="query_type" value="{{query_type}}">
+							<input type="hidden" maxlength=50 size=50 name="query" value="{{query}}">
+							<input type="hidden" name="repeat_last_query" value="1">
+							<input type="hidden" name="offset" value="-">
+							<input type="submit" value="Previous">
+					</form>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+
+		{% if results > 0 %}
+		<p></p>
+		<p></p>
+		<p><strong> {{page_offset}}-{{[(page_offset|int+20), total_rows]|min}} out of {{ total_rows }} results for </strong>{{query}}</p>
+
+		<!-- name, artist, url, tfdif -->
+		{% for result in search_results %}
+		<p><strong><a href="http://www.lyricsfreak.com{{ result[2] }}" target="_blank">{{ result[0] }}</a></strong> <em>by</em> {{ result[1] }} </p>
+		{% endfor %}
+		{% else %}
+		<p></p>
+		<p></p>
+		<p><strong>No results for </strong>{{query}}</p>
+		{% endif %}
+		<p></p>
+		<p></p>
+	</body>
+</html>
+
+
+<!-- https://www.w3schools.com/howto/howto_css_next_prev.asp -->
